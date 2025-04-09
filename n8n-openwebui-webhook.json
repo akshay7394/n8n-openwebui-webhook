@@ -1,8 +1,8 @@
 """
 title: n8n Webhook Trigger
-author: ChatGPT (OpenAI)
-author_url: https://openai.com
-git_url: https://github.com/openwebui/n8n-webhook-toolkit
+author: Akshay Rao
+author_url: https://github.com/akshay7394
+git_url: https://github.com/akshay7394/n8n-openwebui-webhook
 description: This tool sends a JSON payload to an n8n webhook URL
 required_open_webui_version: 0.4.0
 requirements: requests

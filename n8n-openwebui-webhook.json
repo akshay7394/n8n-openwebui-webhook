@@ -18,24 +18,33 @@ class Tools:
     class UserValves(BaseModel):
         webhook_url: str = Field(
             ...,  # Required
-            description="The full URL of the n8n webhook (e.g., https://your-n8n-instance/webhook/endpoint)"
+            description="Full URL of the n8n webhook (e.g., https://n8n.example.com/webhook/endpoint)"
         )
 
     def __init__(self):
         self.citation = False
 
-    def trigger_n8n_webhook(self, payload: Dict[str, Any], __user__: dict) -> str:
+    def trigger_n8n_webhook_with_response(self, payload: Dict[str, Any], __user__: dict) -> str:
         """
-        Sends a JSON payload to the configured n8n webhook URL.
+        Sends a JSON payload to a configured n8n webhook and returns response content.
 
-        :param payload: The JSON object to be sent in the body of the POST request
-        :param __user__: Contains user-specific information, including valves
+        :param payload: A dictionary representing the body of the POST request
+        :param __user__: The user context containing UserValves
+        :return: A string report with the HTTP status and response content
         """
         webhook_url = __user__["valves"].webhook_url
 
         try:
-            response = requests.post(webhook_url, json=payload, timeout=10)
+            response = requests.post(webhook_url, json=payload, timeout=15)
             response.raise_for_status()
-            return f"✅ Webhook triggered successfully. Status code: {response.status_code}"
+            
+            try:
+                response_data = response.json()
+                result = f"✅ Webhook triggered successfully.\n\n**Status Code:** {response.status_code}\n**Response (JSON):**\n```json\n{response_data}\n```"
+            except ValueError:
+                result = f"✅ Webhook triggered successfully.\n\n**Status Code:** {response.status_code}\n**Response (Text):**\n```text\n{response.text}\n```"
+
+            return result
+
         except requests.exceptions.RequestException as e:
-            return f"❌ Failed to trigger webhook: {str(e)}"
+            return f"❌ Failed to trigger webhook:\n```text\n{str(e)}\n```"

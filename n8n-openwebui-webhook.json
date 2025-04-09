@@ -1,0 +1,41 @@
+"""
+title: n8n Webhook Trigger
+author: ChatGPT (OpenAI)
+author_url: https://openai.com
+git_url: https://github.com/openwebui/n8n-webhook-toolkit
+description: This tool sends a JSON payload to an n8n webhook URL
+required_open_webui_version: 0.4.0
+requirements: requests
+version: 0.1.0
+licence: MIT
+"""
+
+import requests
+from pydantic import BaseModel, Field
+from typing import Any, Dict
+
+class Tools:
+    class UserValves(BaseModel):
+        webhook_url: str = Field(
+            ...,  # Required
+            description="The full URL of the n8n webhook (e.g., https://your-n8n-instance/webhook/endpoint)"
+        )
+
+    def __init__(self):
+        self.citation = False
+
+    def trigger_n8n_webhook(self, payload: Dict[str, Any], __user__: dict) -> str:
+        """
+        Sends a JSON payload to the configured n8n webhook URL.
+
+        :param payload: The JSON object to be sent in the body of the POST request
+        :param __user__: Contains user-specific information, including valves
+        """
+        webhook_url = __user__["valves"].webhook_url
+
+        try:
+            response = requests.post(webhook_url, json=payload, timeout=10)
+            response.raise_for_status()
+            return f"✅ Webhook triggered successfully. Status code: {response.status_code}"
+        except requests.exceptions.RequestException as e:
+            return f"❌ Failed to trigger webhook: {str(e)}"
